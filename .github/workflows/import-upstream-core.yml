@@ -1,0 +1,48 @@
+name: Import SimpMusic core into SereinCore (one time)
+
+on:
+  push:
+    paths:
+      - .github/workflows/import-upstream-core.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  import-core:
+    if: github.repository == 'ev-pro047/SereinCore'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout private SereinCore
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Import upstream multiplatform branch with original Git history
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if [[ -f common/build.gradle.kts && -f data/build.gradle.kts && -f domain/build.gradle.kts ]]; then
+            echo "Core modules already exist; skipping import."
+            exit 0
+          fi
+          git remote add upstream https://github.com/maxrave-dev/core.git
+          git fetch --no-tags upstream refs/heads/multiplatform
+          expected=8413a257cbe45d102a9f101f2760e35b549e4d9e
+          actual="$(git rev-parse FETCH_HEAD)"
+          if [[ "$actual" != "$expected" ]]; then
+            echo "Upstream branch moved; refusing unreviewed import ($actual instead of $expected)." >&2
+            exit 1
+          fi
+          git merge --allow-unrelated-histories --no-ff --no-edit FETCH_HEAD
+          test -f common/build.gradle.kts
+          test -f data/build.gradle.kts
+          test -f domain/build.gradle.kts
+          test -f LICENSE
+          git push origin HEAD:main
+          echo "Imported upstream commit $expected into private SereinCore/main."
