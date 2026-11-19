@@ -1,7 +1,7 @@
 package org.simpmusic.lyrics
 
-import com.maxrave.ktorext.crypto.Hmac
-import com.maxrave.ktorext.crypto.HmacUri
+import site.deltastudy.serein.core.network.crypto.Hmac
+import site.deltastudy.serein.core.network.crypto.HmacUri
 import com.maxrave.logger.Logger
 import io.ktor.client.call.body
 import io.ktor.client.statement.HttpResponse
