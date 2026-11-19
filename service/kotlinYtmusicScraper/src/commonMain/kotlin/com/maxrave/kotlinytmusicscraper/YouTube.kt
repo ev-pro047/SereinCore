@@ -1980,9 +1980,7 @@ class YouTube {
         runCatching {
             ytMusic
                 .accountMenu(customCookie, WEB_REMIX)
-                .apply {
-                    Logger.d(TAG, this.bodyAsText())
-                }.body<AccountMenuResponse>()
+                .body<AccountMenuResponse>()
                 .actions[0]
                 .openPopupAction.popup.multiPageMenuRenderer.header
                 ?.activeAccountHeaderRenderer
@@ -1997,7 +1995,6 @@ class YouTube {
                     .bodyAsText()
                     .removePrefix(")]}'\n")
             val accountSwitcherEndpointResponse = ytMusic.normalJson.decodeFromString<AccountSwitcherEndpointResponse>(res)
-            Logger.d(TAG, "Account List Response: $accountSwitcherEndpointResponse")
             accountSwitcherEndpointResponse.toListAccountInfo()
         }
 
