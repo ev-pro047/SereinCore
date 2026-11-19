@@ -19,6 +19,6 @@ class ExampleInstrumentedTest {
     fun useAppContext() {
         // Context of the app under test.
         val appContext = InstrumentationRegistry.getInstrumentation().targetContext
-        assertEquals("com.maxrave.common.test", appContext.packageName)
+        assertEquals("site.deltastudy.serein.core.common.test", appContext.packageName)
     }
 }
