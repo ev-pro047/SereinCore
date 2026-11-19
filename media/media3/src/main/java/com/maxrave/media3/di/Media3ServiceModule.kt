@@ -52,8 +52,8 @@ import com.maxrave.domain.data.player.LiveStreamRegistry
 import com.maxrave.domain.extension.now
 import com.maxrave.domain.manager.DataStoreManager
 import com.maxrave.domain.mediaservice.handler.DownloadHandler
-import com.maxrave.domain.mediaservice.handler.MediaPlayerHandler
-import com.maxrave.domain.mediaservice.player.MediaPlayerInterface
+import site.deltastudy.serein.core.playback.MediaPlayerHandler
+import site.deltastudy.serein.core.playback.MediaPlayerInterface
 import com.maxrave.domain.repository.CacheRepository
 import com.maxrave.domain.repository.HomeRepository
 import com.maxrave.domain.repository.LocalPlaylistRepository

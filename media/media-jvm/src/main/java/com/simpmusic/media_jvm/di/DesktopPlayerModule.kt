@@ -2,7 +2,7 @@ package com.simpmusic.media_jvm.di
 
 import com.maxrave.common.Config.SERVICE_SCOPE
 import com.maxrave.domain.mediaservice.handler.DownloadHandler
-import com.maxrave.domain.mediaservice.player.MediaPlayerInterface
+import site.deltastudy.serein.core.playback.MediaPlayerInterface
 import com.maxrave.domain.notification.DesktopNotificationManager
 import com.maxrave.domain.repository.CacheRepository
 import com.simpmusic.media_jvm.download.DownloadUtils
