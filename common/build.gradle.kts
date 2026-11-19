@@ -12,7 +12,7 @@ kotlin {
     // which platforms this KMP module supports.
     // See: https://kotlinlang.org/docs/multiplatform-discover-project.html#targets
     android {
-        namespace = "com.maxrave.common"
+        namespace = "site.deltastudy.serein.core.common"
         compileSdk = 37
         minSdk = 26
     }
