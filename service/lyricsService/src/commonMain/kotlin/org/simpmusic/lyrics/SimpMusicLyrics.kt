@@ -1,8 +1,8 @@
 package org.simpmusic.lyrics
 
-import com.maxrave.ktorext.curl.CurlLogger
-import com.maxrave.ktorext.encoding.brotli
-import com.maxrave.ktorext.getEngine
+import site.deltastudy.serein.core.network.curl.CurlLogger
+import site.deltastudy.serein.core.network.encoding.brotli
+import site.deltastudy.serein.core.network.getEngine
 import com.maxrave.logger.Logger
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.ProxyConfig

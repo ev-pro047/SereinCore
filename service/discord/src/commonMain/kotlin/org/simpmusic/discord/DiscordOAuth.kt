@@ -1,6 +1,6 @@
 package org.simpmusic.discord
 
-import com.maxrave.ktorext.getEngine
+import site.deltastudy.serein.core.network.getEngine
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.request.forms.submitForm

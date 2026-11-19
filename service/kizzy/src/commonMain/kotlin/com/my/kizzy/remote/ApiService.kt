@@ -11,7 +11,7 @@
  */
 package com.my.kizzy.remote
 
-import com.maxrave.ktorext.curl.CurlLogger
+import site.deltastudy.serein.core.network.curl.CurlLogger
 import com.maxrave.logger.Logger
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.HttpTimeout

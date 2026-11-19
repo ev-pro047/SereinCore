@@ -1,6 +1,6 @@
 package org.simpmusic.loginsync
 
-import com.maxrave.ktorext.getEngine
+import site.deltastudy.serein.core.network.getEngine
 import com.maxrave.logger.Logger
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.HttpTimeout
