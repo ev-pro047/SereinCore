@@ -6,14 +6,14 @@ Status: **isolated candidate — NOT merged, requires SereinPro/CircleCI compila
 Migrate the smallest source-stable foundation first. This is not the bulk package rename of all modules.
 
 1. The canonical logger implementation now lives at `site.deltastudy.serein.core.logging.Logger`.
-2. `com.maxrave.logger.Logger` remains a **Kotlin source alias** to that same object. Existing import sites and file-logging behavior are preserved; no second logger or second writer is created.
+2. `com.maxrave.logger.Logger` remains a **source- and JVM-compatible forwarding facade** to the canonical Serein logger. Existing Kotlin and Java import sites and file-logging behavior are preserved; only the new canonical logger owns the writer and log directory.
 3. The `com.maxrave.logger.LogLevel` enum intentionally retains its original runtime type and values. A new `site.deltastudy.serein.core.logging.LogLevel` alias points at it to avoid changing serialized enum identity.
 4. The two foundation Android **library** namespaces become:
    - `common`: `site.deltastudy.serein.core.common`
    - `ktorExt`: `site.deltastudy.serein.core.network`
    Their **Kotlin** package names outside the logging implementation intentionally remain unchanged until downstream importers and expect/actual bindings can migrate safely.
 5. Instrumentation test expectations follow the new common library namespace.
-6. A multiplatform commonTest checks the old and new logger names resolve to the same object and enum values.
+6. A multiplatform commonTest checks forwarded logger state and unchanged enum values; a JVM test inspects the original class and public method signatures via reflection.
 
 ## Explicitly unchanged
 - SereinPro Android `applicationId = "site.deltastudy.serein"`, debug install behavior, signatures and app user-data path.
@@ -28,13 +28,13 @@ Migrate the smallest source-stable foundation first. This is not the bulk packag
 - `AppIdentity` user-agent behavior and legacy integration strings. Changes there require independent service-level verification.
 
 ## Compatibility boundary
-The old `Logger` declaration is now a **Kotlin typealias**, which preserves Kotlin source imports but **does not create a JVM class at the old fully qualified name**. Do not use this in independently compiled Java consumers or reflection without a separate compatibility analysis. The application compiles core modules from source; the CircleCI APK build is the mandatory gate.
+The old `Logger` declaration remains a real JVM class with the previous fully qualified name and method signatures, forwarding to the canonical Serein logger. The JVM ABI test detects accidental loss of this compatibility. The CircleCI full APK build remains the mandatory gate.
 
 ## Validation order
 1. Verify exact staged tree and unchanged storage modules.
-2. Build `:common:jvmTest` to exercise the namespace compatibility test.
+2. Build `:common:jvmTest` to exercise both namespace compatibility and JVM legacy-class ABI tests.
 3. Build `:androidApp:assembleDebug` through the SereinPro pipeline after updating its pinned core gitlink and tree guards.
-4. Review app compilation diagnostics for Java/reflection callers of the former logger FQN. Stop if found.
+4. Review JVM ABI test and compilation diagnostics for Java/reflection callers of the legacy logger FQN; do not remove the facade without a separate compatibility release.
 5. Install the candidate APK as an upgrade and verify launch, playback, offline music, YouTube login, lyrics, charts, background audio, settings and saved data.
 6. Merge Core and Pro only after evidence; do not enable automatic merge.
 

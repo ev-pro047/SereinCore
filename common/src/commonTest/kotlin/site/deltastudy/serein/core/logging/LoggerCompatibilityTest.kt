@@ -6,14 +6,14 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertSame
 
-/** Run on every platform: old imports must keep using the exact same logger. */
+/** Legacy calls route to the canonical logger; enum identity never changes. */
 class LoggerCompatibilityTest {
     @Test
-    fun legacyAliasResolvesToCanonicalLogger() {
-        assertSame(Logger, LegacyLogger)
+    fun legacyFacadeDelegatesToCanonicalLoggerState() {
         assertEquals(Logger.APP_LOG, LegacyLogger.APP_LOG)
         assertEquals(Logger.ERROR_LOG, LegacyLogger.ERROR_LOG)
         assertEquals(Logger.logDirectory, LegacyLogger.logDirectory)
+        assertEquals(Logger.logFiles(Logger.APP_LOG), LegacyLogger.logFiles(LegacyLogger.APP_LOG))
     }
 
     @Test
