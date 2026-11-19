@@ -22,12 +22,20 @@ class CurlLoggerConfig {
      */
     var logger: (String) -> Unit = { println(it) }
 
+    // Request logging must be explicitly enabled; credentials must not appear in ordinary app logs.
+    var enabled: Boolean = false
+
+    // Even when debugging is enabled, do not record headers, queries, or bodies by default.
+    var includeHeaders: Boolean = false
+    var includeQuery: Boolean = false
+    var includeBody: Boolean = false
+
     /**
      * Header names (case-insensitive) whose value is replaced with `<redacted>`.
-     * Empty by default so the printed command stays copy-paste runnable.
-     * Set e.g. `setOf("Authorization", "Cookie")` to avoid leaking secrets to logs.
+     * Authentication and API credentials are redacted if header logging is explicitly enabled.
      */
-    var redactHeaders: Set<String> = emptySet()
+    var redactHeaders: Set<String> =
+        setOf("Authorization", "Cookie", "Set-Cookie", "Proxy-Authorization", "X-Api-Key", "X-Goog-AuthUser")
 
     /**
      * When true, drops the `Accept-Encoding` request header and appends `--compressed`
@@ -54,16 +62,22 @@ class CurlLoggerConfig {
  */
 val CurlLogger = createClientPlugin("CurlLogger", ::CurlLoggerConfig) {
     val log = pluginConfig.logger
+    val enabled = pluginConfig.enabled
+    val includeHeaders = pluginConfig.includeHeaders
+    val includeQuery = pluginConfig.includeQuery
+    val includeBody = pluginConfig.includeBody
     val redactHeaders = pluginConfig.redactHeaders.mapTo(mutableSetOf()) { it.lowercase() }
     val handleCompression = pluginConfig.handleCompression
 
     on(SendingRequest) { request, content ->
-        try {
-            log(buildCurlCommand(request, content, redactHeaders, handleCompression))
-        } catch (e: CancellationException) {
-            throw e
-        } catch (_: Throwable) {
-            // Logging must never break the actual request.
+        if (enabled) {
+            try {
+                log(buildCurlCommand(request, content, redactHeaders, handleCompression, includeHeaders, includeQuery, includeBody))
+            } catch (e: CancellationException) {
+                throw e
+            } catch (_: Throwable) {
+                // Logging must never break the actual request.
+            }
         }
     }
 }
@@ -74,33 +88,40 @@ private suspend fun buildCurlCommand(
     content: OutgoingContent,
     redactHeaders: Set<String>,
     handleCompression: Boolean,
+    includeHeaders: Boolean,
+    includeQuery: Boolean,
+    includeBody: Boolean,
 ): String {
     val contentLengthName = HttpHeaders.ContentLength.lowercase()
     val acceptEncodingName = HttpHeaders.AcceptEncoding.lowercase()
 
     val parts = mutableListOf<String>()
     parts += "curl -X ${request.method.value}"
-    parts += request.url.buildString().shellQuote()
+    parts += (if (includeQuery) request.url.buildString() else request.url.buildString().substringBefore('?')).shellQuote()
 
-    val seenHeaders = mutableSetOf<String>()
-    request.headers.entries().forEach { (name, values) ->
-        val lower = name.lowercase()
-        if (lower == contentLengthName) return@forEach // let curl recompute it
-        if (handleCompression && lower == acceptEncodingName) return@forEach
-        seenHeaders += lower
-        values.forEach { value ->
-            val shown = if (lower in redactHeaders) "<redacted>" else value
-            parts += "-H " + "$name: $shown".shellQuote()
+    if (includeHeaders) {
+        val seenHeaders = mutableSetOf<String>()
+        request.headers.entries().forEach { (name, values) ->
+            val lower = name.lowercase()
+            if (lower == contentLengthName) return@forEach // let curl recompute it
+            if (handleCompression && lower == acceptEncodingName) return@forEach
+            seenHeaders += lower
+            values.forEach { value ->
+                val shown = if (lower in redactHeaders) "<redacted>" else value
+                parts += "-H " + "$name: $shown".shellQuote()
+            }
         }
-    }
-    if ("content-type" !in seenHeaders) {
-        content.contentType?.let { parts += "-H " + "${HttpHeaders.ContentType}: $it".shellQuote() }
+        if ("content-type" !in seenHeaders) {
+            content.contentType?.let { parts += "-H " + "${HttpHeaders.ContentType}: $it".shellQuote() }
+        }
     }
 
     if (handleCompression) parts += "--compressed"
 
-    content.readBodyOrNull()?.takeIf { it.isNotEmpty() }?.let {
-        parts += "--data-raw " + it.shellQuote()
+    if (includeBody) {
+        content.readBodyOrNull()?.takeIf { it.isNotEmpty() }?.let {
+            parts += "--data-raw " + it.shellQuote()
+        }
     }
 
     return parts.joinToString(" ")

@@ -4,62 +4,25 @@ import com.maxrave.domain.data.model.update.UpdateData
 import com.maxrave.domain.repository.UpdateRepository
 import com.maxrave.domain.utils.Resource
 import com.maxrave.kotlinytmusicscraper.YouTube
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOn
 
+/**
+ * Serein is currently a personal-use build with no public update or signing feed.
+ * Do not offer updates for the unrelated upstream SimpMusic application.
+ *
+ * The constructor remains compatible with the existing Koin dependency graph.
+ * When a Serein-owned update feed is added, implement it explicitly here.
+ */
 internal class UpdateRepositoryImpl(
-    private val youTube: YouTube,
+    @Suppress("unused") private val youTube: YouTube,
 ) : UpdateRepository {
     override fun checkForGithubReleaseUpdate(): Flow<Resource<UpdateData>> =
-        flow {
-            youTube
-                .checkForGithubReleaseUpdate()
-                .onSuccess { response ->
-                    emit(
-                        Resource.Success(
-                            UpdateData(
-                                tagName = response.tagName ?: "",
-                                releaseTime = response.publishedAt ?: "",
-                                body = response.body ?: "",
-                            ),
-                        ),
-                    )
-                }.onFailure {
-                    emit(Resource.Error<UpdateData>(it.localizedMessage ?: "Unknown error"))
-                }
-        }.flowOn(Dispatchers.IO)
+        flow { emit(Resource.Error<UpdateData>("Serein has no configured release update feed.")) }
 
     override fun checkForFdroidUpdate(): Flow<Resource<UpdateData>> =
-        flow {
-            youTube
-                .checkForFdroidUpdate()
-                .onSuccess { response ->
-                    val latestVersion = response.packages.maxBy { it.versionCode }
-                    emit(
-                        Resource.Success(
-                            UpdateData(
-                                tagName = latestVersion.versionName,
-                                releaseTime = null,
-                                body =
-                                    $$"""
-                                    ### Update via F-Droid, changelogs: 
-                                    - https://github.com/maxrave-dev/SimpMusic/blob/dev/fastlane/metadata/android/en-US/changelogs/$${latestVersion.versionCode}.txt
-                                    """.trimIndent(),
-                            ),
-                        ),
-                    )
-                }.onFailure {
-                    emit(Resource.Error<UpdateData>(it.localizedMessage ?: "Unknown error"))
-                }
-        }.flowOn(Dispatchers.IO)
+        flow { emit(Resource.Error<UpdateData>("Serein is not published on F-Droid.")) }
 
     override fun getFdroidSigningKeys(): Flow<Resource<List<String>>> =
-        flow {
-            youTube
-                .getFdroidSigningKeys()
-                .onSuccess { emit(Resource.Success(it)) }
-                .onFailure { emit(Resource.Error<List<String>>(it.localizedMessage ?: "Unknown error")) }
-        }.flowOn(Dispatchers.IO)
+        flow { emit(Resource.Error<List<String>>("Serein has no upstream F-Droid signing record.")) }
 }
