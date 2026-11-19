@@ -30,7 +30,6 @@ import com.maxrave.kotlinytmusicscraper.models.response.DownloadProgress
 import com.maxrave.kotlinytmusicscraper.models.response.RemoteConfig
 import com.maxrave.kotlinytmusicscraper.utils.parseCookieString
 import com.maxrave.kotlinytmusicscraper.utils.sha1
-import com.maxrave.ktorext.curl.CurlLogger
 import com.maxrave.ktorext.encoding.brotli
 import com.maxrave.ktorext.getEngine
 import com.maxrave.logger.Logger
@@ -42,9 +41,6 @@ import io.ktor.client.plugins.HttpResponseValidator
 import io.ktor.client.plugins.compression.ContentEncoding
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.defaultRequest
-import io.ktor.client.plugins.logging.DEFAULT
-import io.ktor.client.plugins.logging.LogLevel
-import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.accept
 import io.ktor.client.request.get
@@ -113,7 +109,7 @@ class Ytmusic {
             expectSuccess = true
             install(HttpRedirect) {
                 checkHttpMethod = false
-                allowHttpsDowngrade = true
+                allowHttpsDowngrade = false
             }
             // Disable logging for download - significantly improves performance
             // Note: Don't install Logging plugin for download client
@@ -170,9 +166,6 @@ class Ytmusic {
     private fun createClient() =
         HttpClient(getEngine()) {
             expectSuccess = true
-            install(CurlLogger) {
-                logger = { Logger.d(TAG, it) }
-            }
             // Every rejected sign-in on this client lands in the app log in one place. Host and path
             // only: the query and headers carry the cookie and the account.
             HttpResponseValidator {
@@ -187,11 +180,7 @@ class Ytmusic {
             }
             install(HttpRedirect) {
                 checkHttpMethod = false
-                allowHttpsDowngrade = true
-            }
-            install(Logging) {
-                logger = io.ktor.client.plugins.logging.Logger.DEFAULT
-                level = LogLevel.ALL
+                allowHttpsDowngrade = false
             }
             install(ContentNegotiation) {
                 protobuf()
@@ -255,7 +244,6 @@ class Ytmusic {
                     val currentTime = now().toInstant(TimeZone.currentSystemDefault()).epochSeconds / 1000
                     val sapisidCookie = cookieMap["SAPISID"] ?: cookieMap["__Secure-3PAPISID"]
                     val sapisidHash = sha1("$currentTime $sapisidCookie https://music.youtube.com")
-                    Logger.d(TAG, "SAPI SID Hash: SAPISIDHASH ${currentTime}_$sapisidHash")
                     append("Authorization", "SAPISIDHASH ${currentTime}_$sapisidHash")
                 }
             }
@@ -271,7 +259,6 @@ class Ytmusic {
             val currentTime = now().toInstant(TimeZone.currentSystemDefault()).epochSeconds / 1000
             val sapisidCookie = cookieMap["SAPISID"] ?: cookieMap["__Secure-3PAPISID"]
             val sapisidHash = sha1("$currentTime $sapisidCookie https://music.youtube.com")
-            Logger.d(TAG, "SAPI SID Hash: SAPISIDHASH ${currentTime}_$sapisidHash")
             "SAPISIDHASH ${currentTime}_$sapisidHash"
         }
 
@@ -718,18 +705,18 @@ class Ytmusic {
         }
 
     suspend fun checkForGithubReleaseUpdate() =
-        httpClient.get("https://api.github.com/repos/maxrave-dev/SimpMusic/releases/latest") {
+        httpClient.get("https://api.github.com/repos/ev-pro047/SereinPro/releases/latest") {
             contentType(ContentType.Application.Json)
         }
 
     suspend fun checkForFdroidUpdate() =
-        httpClient.get("https://f-droid.org/api/v1/packages/com.maxrave.simpmusic") {
+        httpClient.get("https://f-droid.org/api/v1/packages/site.deltastudy.serein") {
             contentType(ContentType.Application.Json)
         }
 
     suspend fun fdroidMetadata() =
         httpClient.get(
-            "https://raw.githubusercontent.com/f-droid/fdroiddata/master/metadata/com.maxrave.simpmusic.yml",
+            "https://raw.githubusercontent.com/f-droid/fdroiddata/master/metadata/site.deltastudy.serein.yml",
         )
 
     suspend fun playlist(playlistId: String) =
@@ -1394,34 +1381,18 @@ class Ytmusic {
     }
 
     /**
-     * Fetch the remote app config (TIDAL credentials) from GitHub raw.
-     *
-     * raw.githubusercontent.com serves .json files as `text/plain`, so Ktor's
-     * ContentNegotiation will not auto-deserialize the body. We read it as text and parse
-     * it explicitly with [normalJson] (which ignores unknown keys for forward-compat).
+     * Serein never requests upstream-controlled app configuration.
+     * Keep this method signature compatible until the service packages are migrated.
+     * Existing cached TIDAL credentials are retained by the data layer.
      */
-    suspend fun getTidalRemoteConfig(dev: Boolean = false): RemoteConfig {
-        val text =
-            httpClient
-                .get(if (dev) REMOTE_CONFIG_DEV_URL else TIDAL_REMOTE_CONFIG_URL) {
-                    accept(ContentType.Application.Json)
-                }.bodyAsText()
-        return normalJson.decodeFromString(RemoteConfig.serializer(), text)
-    }
+    @Suppress("UNUSED_PARAMETER")
+    suspend fun getTidalRemoteConfig(dev: Boolean = false): RemoteConfig = RemoteConfig()
 
     companion object {
         private const val TIDAL_AUTH_URL = "https://auth.tidal.com/v1/oauth2/token"
         private const val TIDAL_SEARCH_URL = "https://tidal.com/v2/client-search/"
 
-        // Remote config (TIDAL credentials) hosted on GitHub raw, fetched on each app launch.
-        // Credentials are NOT hard-coded in source — they live only in this remote file,
-        // kept in a separate repo (simpmusic-files) so the main repo stays credential-free.
-        const val TIDAL_REMOTE_CONFIG_URL =
-            "https://raw.githubusercontent.com/maxrave-dev/simpmusic-files/refs/heads/main/remote-config.json"
 
-        // Read by dev builds only, so a banner can be tried out without any real user seeing it.
-        const val REMOTE_CONFIG_DEV_URL =
-            "https://raw.githubusercontent.com/maxrave-dev/simpmusic-files/refs/heads/main/remote-config-dev.json"
     }
 }
 
