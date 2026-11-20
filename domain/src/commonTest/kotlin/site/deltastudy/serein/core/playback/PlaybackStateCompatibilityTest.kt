@@ -27,19 +27,19 @@ class PlaybackStateCompatibilityTest {
         assertEquals(LegacyOutputKind.entries.map { it.name },
             AudioOutputKind.entries.map { it.name })
         assertSame(LegacyOutputKind.BLUETOOTH, AudioOutputKind.BLUETOOTH)
-        assertSame(com.maxrave.domain.data.player.EightDOrbit::class, EightDOrbit::class)
+        assertEquals(com.maxrave.domain.data.player.EightDOrbit::class, EightDOrbit::class)
     }
 
     @Test
     fun queueRepeatAndControlEventsKeepExistingRuntimeTypes() {
-        assertSame(LegacyRepeatState::class, RepeatState::class)
-        assertSame(LegacyPlayerEvent::class, PlayerEvent::class)
-        assertSame(com.maxrave.domain.mediaservice.handler.QueueData::class, QueueData::class)
-        assertSame(com.maxrave.domain.mediaservice.handler.SimpleMediaState::class,
+        assertEquals(LegacyRepeatState::class, RepeatState::class)
+        assertEquals(LegacyPlayerEvent::class, PlayerEvent::class)
+        assertEquals(com.maxrave.domain.mediaservice.handler.QueueData::class, QueueData::class)
+        assertEquals(com.maxrave.domain.mediaservice.handler.SimpleMediaState::class,
             SimpleMediaState::class)
-        assertSame(com.maxrave.domain.mediaservice.handler.ControlState::class,
+        assertEquals(com.maxrave.domain.mediaservice.handler.ControlState::class,
             ControlState::class)
-        assertSame(com.maxrave.domain.mediaservice.handler.NowPlayingTrackState::class,
+        assertEquals(com.maxrave.domain.mediaservice.handler.NowPlayingTrackState::class,
             NowPlayingTrackState::class)
     }
 }
