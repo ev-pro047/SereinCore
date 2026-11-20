@@ -22,11 +22,11 @@ import androidx.media3.exoplayer.audio.AudioSink
 import androidx.media3.exoplayer.audio.DefaultAudioSink
 import androidx.media3.exoplayer.audio.SilenceSkippingAudioProcessor
 import com.maxrave.common.MERGING_DATA_TYPE
-import com.maxrave.domain.data.player.AudioEffects
-import com.maxrave.domain.data.player.AudioOutput
-import com.maxrave.domain.data.player.EightDEffect
-import com.maxrave.domain.data.player.EightDOrbit
-import com.maxrave.domain.data.player.GenericCastState
+import site.deltastudy.serein.core.playback.AudioEffects
+import site.deltastudy.serein.core.playback.AudioOutput
+import site.deltastudy.serein.core.playback.EightDEffect
+import site.deltastudy.serein.core.playback.EightDOrbit
+import site.deltastudy.serein.core.playback.GenericCastState
 import site.deltastudy.serein.core.playback.GenericMediaItem
 import site.deltastudy.serein.core.playback.GenericPlaybackParameters
 import com.maxrave.domain.data.player.LiveStreamRegistry
