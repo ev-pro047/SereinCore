@@ -1,6 +1,6 @@
 package com.maxrave.data.librarysync
 
-import com.maxrave.data.db.SyncDao
+import site.deltastudy.serein.core.storage.SereinSyncDao
 import com.maxrave.domain.data.entities.sync.SyncChangeEntity
 import com.maxrave.logger.Logger
 import kotlinx.coroutines.CancellationException
@@ -18,7 +18,7 @@ private const val TAG = "LibrarySync"
  * reported as failed because sync could not take note of it.
  */
 internal class SyncChangeRecorder(
-    private val dao: SyncDao,
+    private val dao: SereinSyncDao,
     private val prefs: SyncPrefs,
 ) {
     /** Whether a change made now would be recorded. Cheap; lets callers skip reads they only need for sync. */
