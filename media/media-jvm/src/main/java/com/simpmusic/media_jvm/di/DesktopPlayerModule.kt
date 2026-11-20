@@ -2,11 +2,11 @@ package com.simpmusic.media_jvm.di
 
 import com.maxrave.common.Config.SERVICE_SCOPE
 import com.maxrave.domain.mediaservice.handler.DownloadHandler
-import com.maxrave.domain.mediaservice.player.MediaPlayerInterface
+import site.deltastudy.serein.core.playback.MediaPlayerInterface
 import com.maxrave.domain.notification.DesktopNotificationManager
 import com.maxrave.domain.repository.CacheRepository
 import com.simpmusic.media_jvm.download.DownloadUtils
-import com.simpmusic.media_jvm.mpv.MpvPlayerAdapter
+import site.deltastudy.serein.core.playback.desktop.SereinMpvPlayerAdapter
 import com.simpmusic.media_jvm.notification.NucleusDesktopNotificationManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
@@ -29,8 +29,8 @@ private val desktopPlayerModule =
             CoroutineScope(playerDispatcher + SupervisorJob())
         }
 
-        single<MpvPlayerAdapter> {
-            MpvPlayerAdapter(
+        single<SereinMpvPlayerAdapter> {
+            SereinMpvPlayerAdapter(
                 coroutineScope = get(named(SERVICE_SCOPE)),
                 dataStoreManager = get(),
                 streamRepository = get(),
@@ -39,7 +39,7 @@ private val desktopPlayerModule =
 
         // ---- Active playback backend ----
         single<MediaPlayerInterface> {
-            get<MpvPlayerAdapter>()
+            get<SereinMpvPlayerAdapter>()
         }
 
         single<CacheRepository> {

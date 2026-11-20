@@ -52,8 +52,8 @@ import com.maxrave.domain.data.player.LiveStreamRegistry
 import com.maxrave.domain.extension.now
 import com.maxrave.domain.manager.DataStoreManager
 import com.maxrave.domain.mediaservice.handler.DownloadHandler
-import com.maxrave.domain.mediaservice.handler.MediaPlayerHandler
-import com.maxrave.domain.mediaservice.player.MediaPlayerInterface
+import site.deltastudy.serein.core.playback.MediaPlayerHandler
+import site.deltastudy.serein.core.playback.MediaPlayerInterface
 import com.maxrave.domain.repository.CacheRepository
 import com.maxrave.domain.repository.HomeRepository
 import com.maxrave.domain.repository.LocalPlaylistRepository
@@ -65,7 +65,8 @@ import com.maxrave.logger.Logger
 import com.maxrave.media3.cast.CastHandoffManager
 import com.maxrave.media3.waveform.WaveformReader
 import com.maxrave.media3.cast.CastStreamResolver
-import com.maxrave.media3.exoplayer.CrossfadeExoPlayerAdapter
+import site.deltastudy.serein.core.playback.android.SereinCrossfadePlayer
+import site.deltastudy.serein.core.playback.android.SereinMediaSessionService
 import com.maxrave.media3.extension.isFullyCached
 import com.maxrave.media3.repository.CacheRepositoryImpl
 import com.maxrave.media3.service.SimpleMediaService
@@ -181,7 +182,7 @@ private val mediaServiceModule =
         // Cast support in the full build; org.simpmusic.cast no-ops back to the same instance
         // in the FOSS build, so this stays the stable session-level player either way.
         single<Player>(qualifier = named(MAIN_PLAYER)) {
-            val adapter = get<MediaPlayerInterface>() as CrossfadeExoPlayerAdapter
+            val adapter = get<MediaPlayerInterface>() as SereinCrossfadePlayer
             initCast(androidContext())
             wrapWithCastPlayer(androidContext(), adapter.forwardingPlayer)
         }
@@ -210,7 +211,7 @@ private val mediaServiceModule =
         }
 
         single<MediaPlayerInterface>(createdAtStart = true) {
-            CrossfadeExoPlayerAdapter(
+            SereinCrossfadePlayer(
                 context = androidContext(),
                 coroutineScope = get(named(SERVICE_SCOPE)),
                 dataStoreManager = get(),
@@ -225,7 +226,7 @@ private val mediaServiceModule =
         // ForwardingPlayer (FOSS build or no GMS on the device).
         single<CastHandoffManager>(createdAtStart = true) {
             CastHandoffManager(
-                adapter = get<MediaPlayerInterface>() as CrossfadeExoPlayerAdapter,
+                adapter = get<MediaPlayerInterface>() as SereinCrossfadePlayer,
                 sessionPlayer = get(qualifier = named(MAIN_PLAYER)),
                 resolver = CastStreamResolver(get(), get()),
                 coroutineScope = get(qualifier = named(SERVICE_SCOPE)),
@@ -624,7 +625,7 @@ fun startService(
     context: Context,
     serviceConnection: ServiceConnection,
 ) {
-    val intent = Intent(context, SimpleMediaService::class.java)
+    val intent = Intent(context, SereinMediaSessionService::class.java)
     try {
         context.startService(intent)
     } catch (e: IllegalStateException) {
@@ -637,7 +638,7 @@ fun startService(
 
 @OptIn(UnstableApi::class)
 fun stopService(context: Context) {
-    context.stopService(Intent(context, SimpleMediaService::class.java))
+    context.stopService(Intent(context, SereinMediaSessionService::class.java))
 }
 
 @OptIn(UnstableApi::class)

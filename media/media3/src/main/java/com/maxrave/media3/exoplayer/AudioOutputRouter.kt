@@ -9,8 +9,8 @@ import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
-import com.maxrave.domain.data.player.AudioOutput
-import com.maxrave.domain.data.player.AudioOutputKind
+import site.deltastudy.serein.core.playback.AudioOutput
+import site.deltastudy.serein.core.playback.AudioOutputKind
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

@@ -1,8 +1,8 @@
 package com.simpmusic.media_jvm.mpv
 
-import com.maxrave.domain.data.player.AudioEffects
-import com.maxrave.domain.data.player.EightDEffect
-import com.maxrave.domain.data.player.EightDOrbit
+import site.deltastudy.serein.core.playback.AudioEffects
+import site.deltastudy.serein.core.playback.EightDEffect
+import site.deltastudy.serein.core.playback.EightDOrbit
 import com.maxrave.logger.Logger
 import com.sun.jna.Memory
 import com.sun.jna.Pointer
