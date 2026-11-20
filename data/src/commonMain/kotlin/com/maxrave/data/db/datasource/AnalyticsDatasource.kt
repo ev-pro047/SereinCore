@@ -1,6 +1,6 @@
 package com.maxrave.data.db.datasource
 
-import DatabaseDao
+import site.deltastudy.serein.core.storage.SereinDatabaseDao
 import com.maxrave.data.librarysync.SyncChangeRecorder
 import com.maxrave.data.librarysync.newSyncId
 import com.maxrave.domain.data.entities.analytics.PlaybackEventEntity
@@ -9,7 +9,7 @@ import com.maxrave.domain.extension.now
 import kotlinx.datetime.LocalDateTime
 
 internal class AnalyticsDatasource(
-    private val databaseDao: DatabaseDao,
+    private val databaseDao: SereinDatabaseDao,
     private val syncRecorder: SyncChangeRecorder,
 ) {
     // Every play gets its library-sync identity when it is written, paired or not, so pairing later

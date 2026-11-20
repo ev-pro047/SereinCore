@@ -1,7 +1,7 @@
 package com.maxrave.data.db.datasource
 
-import DatabaseDao
-import com.maxrave.data.db.MusicDatabase
+import site.deltastudy.serein.core.storage.SereinDatabaseDao
+import site.deltastudy.serein.core.storage.SereinMusicDatabase
 import com.maxrave.data.librarysync.SyncChangeRecorder
 import com.maxrave.data.librarysync.SyncKind
 import com.maxrave.data.librarysync.newSyncId
@@ -48,14 +48,14 @@ private const val DELETE_BATCH_SIZE = 400
 private const val PLACEHOLDER_ALBUM_NAME = "Album"
 
 internal class LocalDataSource(
-    private val databaseDao: DatabaseDao,
-    private val musicDatabase: MusicDatabase,
+    private val databaseDao: SereinDatabaseDao,
+    private val musicDatabase: SereinMusicDatabase,
     // Every write to an item library sync carries also tells this, which notes it only while paired.
     private val syncRecorder: SyncChangeRecorder,
 ) {
     suspend fun checkpoint() = databaseDao.checkpoint()
 
-    /** Goes through the database rather than the DAO — see [MusicDatabase.vacuum]. */
+    /** Goes through the database rather than the DAO — see [SereinMusicDatabase.vacuum]. */
     suspend fun vacuum() = musicDatabase.vacuum()
 
     suspend fun getAllRecentData() = databaseDao.getAllRecentData()
