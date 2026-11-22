@@ -1,21 +1,21 @@
 package com.maxrave.data.di
 
-import DatabaseDao
+import site.deltastudy.serein.core.storage.SereinDatabaseDao
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import com.maxrave.data.dataStore.DataStoreManagerImpl
 import com.maxrave.data.dataStore.createDataStoreInstance
 import com.maxrave.data.db.Converters
-import com.maxrave.data.db.MusicDatabase
-import com.maxrave.data.db.SyncDao
+import site.deltastudy.serein.core.storage.SereinMusicDatabase
+import site.deltastudy.serein.core.storage.SereinSyncDao
 import com.maxrave.data.librarysync.SyncChangeRecorder
 import com.maxrave.data.librarysync.SyncPrefs
 import com.maxrave.data.librarysync.createLibrarySyncDataStore
 import com.maxrave.data.db.datasource.AnalyticsDatasource
 import com.maxrave.data.db.datasource.LocalDataSource
 import com.maxrave.data.db.getDatabaseBuilder
-import com.maxrave.domain.manager.DataStoreManager
+import site.deltastudy.serein.core.storage.SereinSettingsStore
 import com.maxrave.kotlinytmusicscraper.YouTube
 import com.maxrave.spotify.Spotify
 import kotlinx.coroutines.Dispatchers
@@ -43,33 +43,33 @@ val databaseModule =
         }
         // DatabaseDao
         single(createdAtStart = true) {
-            get<MusicDatabase>().getDatabaseDao()
+            get<SereinMusicDatabase>().getDatabaseDao()
         }
         // Library sync (#2663): its own small preferences file, its DAO, and the recorder every
         // write to a synced item goes through.
         single(createdAtStart = true) {
-            get<MusicDatabase>().getSyncDao()
+            get<SereinMusicDatabase>().getSyncDao()
         }
         single(createdAtStart = true) {
             SyncPrefs(createLibrarySyncDataStore())
         }
         single(createdAtStart = true) {
-            SyncChangeRecorder(get<SyncDao>(), get<SyncPrefs>())
+            SyncChangeRecorder(get<SereinSyncDao>(), get<SyncPrefs>())
         }
         // LocalDataSource
         single(createdAtStart = true) {
-            LocalDataSource(get<DatabaseDao>(), get<MusicDatabase>(), get<SyncChangeRecorder>())
+            LocalDataSource(get<SereinDatabaseDao>(), get<SereinMusicDatabase>(), get<SyncChangeRecorder>())
         }
         // AnalyticsDatasource
         single(createdAtStart = true) {
-            AnalyticsDatasource(get<DatabaseDao>(), get<SyncChangeRecorder>())
+            AnalyticsDatasource(get<SereinDatabaseDao>(), get<SyncChangeRecorder>())
         }
         // Datastore
         single(createdAtStart = true) {
             createDataStoreInstance()
         }
         // DatastoreManager
-        single<DataStoreManager>(createdAtStart = true) {
+        single<SereinSettingsStore>(createdAtStart = true) {
             DataStoreManagerImpl(get<DataStore<Preferences>>())
         }
 
